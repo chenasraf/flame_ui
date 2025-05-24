@@ -1,0 +1,17 @@
+name: flame_ui_example
+description: Example app for flame_ui
+publish_to: "none"
+
+environment:
+  sdk: ">=3.1.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: any
+  flame_ui:
+    path: ../
+
+flutter:
+  assets:
+    - assets/images/

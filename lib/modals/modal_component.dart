@@ -36,8 +36,11 @@ class ModalComponent extends PositionComponent with HasGameReference {
   /// The paint used to draw the background of the modal.
   final Paint dialogPaint;
 
-  /// The optional sprite for the close button icon.
+  /// The sprite for the close button icon.
   final Sprite? closeIcon;
+
+  /// The sprite for the close button icon when pressed down.
+  final Sprite? closeIconDown;
 
   /// The callback to invoke when the close button is pressed.
   final VoidCallback? onClose;
@@ -92,6 +95,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
     this.titleSpacing = 2,
     Paint? paint,
     this.closeIcon,
+    this.closeIconDown,
     this.onClose,
     this.onAfterLoad,
     this.footer,
@@ -130,18 +134,10 @@ class ModalComponent extends PositionComponent with HasGameReference {
     }
 
     // Add the close button if a close icon or callback is provided.
-    if (closeIcon != null || onClose != null) {
-      Sprite? effectiveCloseIcon = closeIcon;
-      if (effectiveCloseIcon == null) {
-        final iconSheet = SpriteSheet(
-          image: await game.images.load('ui/ui_icons.png'),
-          srcSize: Vector2.all(16),
-        );
-        effectiveCloseIcon = iconSheet.getSpriteById(3);
-      }
+    if (closeIcon != null && onClose != null) {
       closeButton = SpriteButtonComponent(
-        button: effectiveCloseIcon,
-        buttonDown: effectiveCloseIcon,
+        button: closeIcon,
+        buttonDown: closeIconDown ?? closeIcon,
         size: Vector2.all(16),
         position: Vector2(size.x - padding.right - 16, scrollTop),
         onPressed: onClose ?? () => removeFromParent(),
