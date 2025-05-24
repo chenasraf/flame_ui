@@ -1,7 +1,8 @@
 name: flame_ui
 description: A reusable component library for Flame games
 version: 0.0.1
-homepage:
+homepage: https://github.com/chenasraf/flame_ui
+repository: https://github.com/chenasraf/flame_ui
 
 environment:
   sdk: ^3.7.2
@@ -10,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flame: any
+  flame: ^1.29.0
 
 dev_dependencies:
   flutter_test:
