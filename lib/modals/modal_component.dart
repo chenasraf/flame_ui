@@ -7,26 +7,79 @@ import 'package:flutter/painting.dart';
 
 import '../layout/scrollable_area_component.dart';
 
+/// A modal dialog component that can display content, a title, a footer, and a close button.
+///
+/// This component is designed to be used in a Flame game and provides a scrollable
+/// area for its content, along with customizable styling and behavior.
 class ModalComponent extends PositionComponent with HasGameReference {
+  /// The content to be displayed inside the scrollable area of the modal.
   final PositionComponent scrollContent;
+
+  /// The optional title of the modal.
   final String? title;
+
+  /// The padding around the content of the modal.
   final EdgeInsets padding;
+
+  /// The height of the content. If null, it will be resolved based on [autoContentHeight].
   final double? contentHeight;
+
+  /// Whether to automatically determine the content height based on the size of the content.
   final bool autoContentHeight;
+
+  /// The text style for the title.
   final TextStyle? titleStyle;
+
+  /// The spacing between the title and the content.
   final double titleSpacing;
+
+  /// The paint used to draw the background of the modal.
   final Paint dialogPaint;
+
+  /// The optional sprite for the close button icon.
   final Sprite? closeIcon;
+
+  /// The callback to invoke when the close button is pressed.
   final VoidCallback? onClose;
+
+  /// The callback to invoke after the modal has finished loading.
   final VoidCallback? onAfterLoad;
+
+  /// The optional footer component to display at the bottom of the modal.
   final PositionComponent? footer;
+
+  /// The default height of the footer if its size is not explicitly set.
   final double defaultFooterHeight;
 
+  /// The scrollable area component for the modal's content.
   late final ScrollableAreaComponent scrollArea;
+
+  /// The background rectangle component for the modal.
   late final RectangleComponent background;
+
+  /// The text component for the title, if a title is provided.
   late final TextComponent? titleComponent;
+
+  /// The sprite button component for the close button, if a close icon or callback is provided.
   late final SpriteButtonComponent? closeButton;
 
+  /// Creates a [ModalComponent] with the given parameters.
+  ///
+  /// [scrollContent] is required and specifies the content to display inside the modal.
+  /// [size] specifies the size of the modal.
+  /// [position] specifies the position of the modal.
+  /// [title] is optional and specifies the title of the modal.
+  /// [padding] specifies the padding around the content (default is 8).
+  /// [contentHeight] optionally specifies the height of the content.
+  /// [autoContentHeight] determines if the content height should be automatically calculated (default is true).
+  /// [titleStyle] specifies the text style for the title.
+  /// [titleSpacing] specifies the spacing between the title and the content (default is 2).
+  /// [paint] optionally specifies the paint for the background.
+  /// [closeIcon] optionally specifies the sprite for the close button icon.
+  /// [onClose] optionally specifies a callback for the close button.
+  /// [onAfterLoad] optionally specifies a callback after the modal has loaded.
+  /// [footer] optionally specifies a footer component to display at the bottom.
+  /// [defaultFooterHeight] specifies the default height of the footer (default is 32).
   ModalComponent({
     required this.scrollContent,
     required Vector2 size,
@@ -52,11 +105,12 @@ class ModalComponent extends PositionComponent with HasGameReference {
   Future<void> onLoad() async {
     await super.onLoad();
 
+    // Add the background rectangle.
     add(RectangleComponent(size: size, paint: dialogPaint));
 
     double scrollTop = padding.top;
 
-    // Title
+    // Add the title if it exists.
     if (title != null) {
       titleComponent = TextComponent(
         text: title!,
@@ -75,7 +129,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
       add(titleComponent!);
     }
 
-    // Close button
+    // Add the close button if a close icon or callback is provided.
     if (closeIcon != null || onClose != null) {
       Sprite? effectiveCloseIcon = closeIcon;
       if (effectiveCloseIcon == null) {
@@ -95,13 +149,13 @@ class ModalComponent extends PositionComponent with HasGameReference {
       add(closeButton!);
     }
 
-    // Advance scrollTop below title row
+    // Adjust the scrollTop position below the title row.
     if (titleComponent != null) {
       await titleComponent!.onLoad();
       scrollTop += titleComponent!.height + titleSpacing;
     }
 
-    // Footer
+    // Add the footer if it exists.
     double scrollBottom = padding.bottom;
     if (footer != null) {
       await footer!.onLoad();
@@ -115,7 +169,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
       );
     }
 
-    // Scrollable area
+    // Create and add the scrollable area for the content.
     final scrollAreaSize = Vector2(
       size.x - padding.horizontal,
       size.y - scrollTop - scrollBottom,
@@ -130,13 +184,16 @@ class ModalComponent extends PositionComponent with HasGameReference {
     );
     add(scrollArea);
 
+    // Invoke the callback after the modal has loaded.
     onAfterLoad?.call();
   }
 
+  /// Displays the modal by adding it to the game's viewport.
   Future<void> show(FlameGame game) async {
     game.camera.viewport.add(this);
   }
 
+  /// Hides the modal by removing it from the game's viewport.
   void hide(FlameGame game) {
     game.camera.viewport.remove(this);
   }

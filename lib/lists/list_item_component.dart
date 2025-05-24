@@ -4,21 +4,55 @@ import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart' show TextStyle, Colors, EdgeInsets;
 
+/// A component representing a single item in a list.
+///
+/// This component displays an optional icon, a title, an optional subtitle,
+/// and an optional action component. It supports custom styling and spacing.
 class ListItemComponent extends PositionComponent
     with HasGameReference, TapCallbacks {
+  /// The title text of the list item.
   final String title;
+
+  /// The optional subtitle text of the list item.
   final String? subtitle;
+
+  /// The optional icon to display in the list item.
   final Sprite? icon;
+
+  /// The optional action component to display on the right side of the list item.
   final PositionComponent? action;
 
+  /// The padding around the content of the list item.
   final EdgeInsets padding;
+
+  /// The spacing between elements (e.g., icon, text, action) in the list item.
   final double spacing;
 
+  /// The text style for the title.
   final TextStyle titleStyle;
+
+  /// The text style for the subtitle.
   final TextStyle subtitleStyle;
+
+  /// The size of the icon. If null, it defaults to the height of the content.
   final Vector2? iconSize;
+
+  /// The callback to invoke when the list item is tapped.
   final VoidCallback? onPressed;
 
+  /// Creates a [ListItemComponent] with the given parameters.
+  ///
+  /// [title] is required and specifies the main text of the list item.
+  /// [subtitle] is optional and specifies additional text below the title.
+  /// [icon] is optional and specifies an icon to display on the left.
+  /// [action] is optional and specifies a component to display on the right.
+  /// [onPressed] is optional and specifies a callback for tap events.
+  /// [padding] specifies the padding around the content (default is 2).
+  /// [spacing] specifies the spacing between elements (default is 4).
+  /// [titleStyle] specifies the text style for the title.
+  /// [subtitleStyle] specifies the text style for the subtitle.
+  /// [size] and [position] specify the size and position of the component.
+  /// [iconSize] specifies the size of the icon (optional).
   ListItemComponent({
     required this.title,
     this.subtitle,
@@ -41,7 +75,7 @@ class ListItemComponent extends PositionComponent
     final contentHeight = size.y - padding.vertical;
     double x = padding.left;
 
-    // Icon
+    // Add the icon if it exists.
     if (icon != null) {
       final resolvedIconSize =
           iconSize ?? Vector2(contentHeight, contentHeight);
@@ -56,7 +90,7 @@ class ListItemComponent extends PositionComponent
       x += iconComponent.size.x + spacing;
     }
 
-    // Action
+    // Add the action component if it exists.
     double actionWidth = 0;
     if (action != null) {
       actionWidth = action!.size.x;
@@ -66,13 +100,14 @@ class ListItemComponent extends PositionComponent
       add(action!);
     }
 
-    // Text block width
+    // Calculate the width available for the text block.
     final textWidth = size.x - x - padding.right - actionWidth;
 
     final hasSubtitle = subtitle != null;
     final titleFontSize = titleStyle.fontSize ?? 10;
     final subtitleFontSize = subtitleStyle.fontSize ?? 8;
 
+    // Add the title and subtitle (if present) as text components.
     if (hasSubtitle) {
       final totalTextHeight = titleFontSize + spacing + subtitleFontSize;
       final startY = padding.top + (contentHeight - totalTextHeight) / 2;
@@ -110,6 +145,7 @@ class ListItemComponent extends PositionComponent
 
   @override
   void onTapUp(TapUpEvent event) {
+    // Invoke the callback when the list item is tapped.
     onPressed?.call();
   }
 }
