@@ -1,7 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
-import 'package:flame/sprite.dart';
 import 'package:flutter/material.dart' show Colors, TextStyle, EdgeInsets;
 import 'package:flutter/painting.dart';
 
@@ -36,13 +35,15 @@ class ModalComponent extends PositionComponent with HasGameReference {
   /// The paint used to draw the background of the modal.
   final Paint dialogPaint;
 
-  /// The sprite for the close button icon.
-  final Sprite? closeIcon;
+  /// The optional close button to be rendered in the top-right corner.
+  ///
+  /// The button will be automatically positioned based on [padding] and its own size.
+  /// Any [PositionComponent] can be used, including [SpriteButtonComponent].
+  final PositionComponent? closeButton;
 
-  /// The sprite for the close button icon when pressed down.
-  final Sprite? closeIconDown;
-
-  /// The callback to invoke when the close button is pressed.
+  /// The callback to invoke when the modal is closed.
+  ///
+  /// This is not wired to [closeButton] directly — you should attach it to the component manually.
   final VoidCallback? onClose;
 
   /// The callback to invoke after the modal has finished loading.
@@ -63,9 +64,6 @@ class ModalComponent extends PositionComponent with HasGameReference {
   /// The text component for the title, if a title is provided.
   late final TextComponent? titleComponent;
 
-  /// The sprite button component for the close button, if a close icon or callback is provided.
-  late final SpriteButtonComponent? closeButton;
-
   /// Creates a [ModalComponent] with the given parameters.
   ///
   /// [scrollContent] is required and specifies the content to display inside the modal.
@@ -78,8 +76,8 @@ class ModalComponent extends PositionComponent with HasGameReference {
   /// [titleStyle] specifies the text style for the title.
   /// [titleSpacing] specifies the spacing between the title and the content (default is 2).
   /// [paint] optionally specifies the paint for the background.
-  /// [closeIcon] optionally specifies the sprite for the close button icon.
-  /// [onClose] optionally specifies a callback for the close button.
+  /// [closeButton] optionally provides a component to render in the top-right corner.
+  /// [onClose] optionally specifies a callback to call when the modal is closed.
   /// [onAfterLoad] optionally specifies a callback after the modal has loaded.
   /// [footer] optionally specifies a footer component to display at the bottom.
   /// [defaultFooterHeight] specifies the default height of the footer (default is 32).
@@ -94,15 +92,12 @@ class ModalComponent extends PositionComponent with HasGameReference {
     this.titleStyle,
     this.titleSpacing = 2,
     Paint? paint,
-    this.closeIcon,
-    this.closeIconDown,
+    this.closeButton,
     this.onClose,
     this.onAfterLoad,
     this.footer,
     this.defaultFooterHeight = 32,
-  }) : dialogPaint =
-           paint ?? Paint()
-             ..color = Colors.black87,
+  }) : dialogPaint = paint ?? (Paint()..color = Colors.black87),
        super(size: size, position: position);
 
   @override
@@ -110,7 +105,8 @@ class ModalComponent extends PositionComponent with HasGameReference {
     await super.onLoad();
 
     // Add the background rectangle.
-    add(RectangleComponent(size: size, paint: dialogPaint));
+    background = RectangleComponent(size: size, paint: dialogPaint);
+    add(background);
 
     double scrollTop = padding.top;
 
@@ -133,15 +129,15 @@ class ModalComponent extends PositionComponent with HasGameReference {
       add(titleComponent!);
     }
 
-    // Add the close button if a close icon or callback is provided.
-    if (closeIcon != null && onClose != null) {
-      closeButton = SpriteButtonComponent(
-        button: closeIcon,
-        buttonDown: closeIconDown ?? closeIcon,
-        size: Vector2.all(16),
-        position: Vector2(size.x - padding.right - 16, scrollTop),
-        onPressed: onClose ?? () => removeFromParent(),
-      );
+    // Add the close button if it exists, positioned top-right using padding.
+    if (closeButton != null) {
+      await closeButton!.onLoad();
+      closeButton!
+        ..position = Vector2(
+          size.x - padding.right - closeButton!.size.x,
+          padding.top,
+        )
+        ..anchor = Anchor.topLeft;
       add(closeButton!);
     }
 
