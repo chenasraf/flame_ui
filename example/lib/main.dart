@@ -46,6 +46,7 @@ class FlameUIExample extends FlameGame
       label: 'Show Modal',
       position: Vector2(20, 60),
       size: Vector2(100, 28),
+      color: Colors.red,
       onPressed: _showModal,
     );
     rootContainer.add(showModalButton);
@@ -74,6 +75,7 @@ class FlameUIExample extends FlameGame
           label: 'G$i',
           size: Vector2.all(36),
           position: Vector2.zero(),
+          color: Colors.red,
           onPressed: () => print('Grid $i'),
         );
       }),
@@ -109,8 +111,13 @@ class FlameUIExample extends FlameGame
       position: Vector2.zero(),
     );
 
+    final sprite = Sprite(await images.load('cross.png'));
     modal = ModalComponent(
-      closeIcon: Sprite(await images.load('cross.png')),
+      closeButton: SpriteButtonComponent(
+        button: sprite,
+        buttonDown: sprite,
+        size: Vector2.all(16),
+      ),
       scrollContent: modalContent,
       size: Vector2(200, 200),
       position: size / 2 - Vector2(100, 100),
