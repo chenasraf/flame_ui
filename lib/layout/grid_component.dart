@@ -54,4 +54,3 @@ class GridComponent extends PositionComponent {
     }
   }
 }
-

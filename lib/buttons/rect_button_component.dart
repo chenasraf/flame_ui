@@ -83,4 +83,3 @@ class RectButtonComponent extends PositionComponent
     onPressed();
   }
 }
-

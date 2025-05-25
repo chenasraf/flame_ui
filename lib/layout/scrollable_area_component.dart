@@ -81,4 +81,3 @@ class ScrollableAreaComponent extends PositionComponent
     return true;
   }
 }
-

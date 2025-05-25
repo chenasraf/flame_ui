@@ -149,4 +149,3 @@ class ListItemComponent extends PositionComponent
     onPressed?.call();
   }
 }
-

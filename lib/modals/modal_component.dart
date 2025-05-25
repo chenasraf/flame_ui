@@ -190,4 +190,3 @@ class ModalComponent extends PositionComponent with HasGameReference {
     game.camera.viewport.remove(this);
   }
 }
-

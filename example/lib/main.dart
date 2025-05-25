@@ -128,4 +128,3 @@ class FlameUIExample extends FlameGame
     add(modal);
   }
 }
-

@@ -64,4 +64,3 @@ class ListComponent extends PositionComponent {
     }
   }
 }
-

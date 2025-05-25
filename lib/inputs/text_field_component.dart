@@ -175,4 +175,3 @@ class TextFieldComponent extends PositionComponent
     super.onRemove();
   }
 }
-
