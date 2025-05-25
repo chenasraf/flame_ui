@@ -45,7 +45,7 @@ class RectButtonComponent extends PositionComponent
     required this.label,
     required super.size,
     required super.position,
-    this.color = Colors.red,
+    required this.color,
     Color? pressedColor,
     this.textColor = Colors.white,
   }) : pressedColor = pressedColor ?? color,
