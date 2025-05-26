@@ -1,6 +1,10 @@
-## 0.0.2
+## 0.0.3
 
-### Changes
+- `ModalComponent`: All configurable properties are now mutable via getters and setters.
+- `ModalComponent`: Automatically calls `rebuild()` when a property is changed at runtime, enabling
+  dynamic UI updates.
+
+## 0.0.2
 
 - `RectButtonComponent`: Make color mandatory
 - `ModalComponent`: Support any component as closeButton

@@ -11,58 +11,31 @@ import '../layout/scrollable_area_component.dart';
 /// This component is designed to be used in a Flame game and provides a scrollable
 /// area for its content, along with customizable styling and behavior.
 class ModalComponent extends PositionComponent with HasGameReference {
-  /// The content to be displayed inside the scrollable area of the modal.
-  final PositionComponent scrollContent;
-
-  /// The optional title of the modal.
-  final String? title;
-
-  /// The padding around the content of the modal.
-  final EdgeInsets padding;
-
-  /// The height of the content. If null, it will be resolved based on [autoContentHeight].
-  final double? contentHeight;
-
-  /// Whether to automatically determine the content height based on the size of the content.
-  final bool autoContentHeight;
-
-  /// The text style for the title.
-  final TextStyle? titleStyle;
-
-  /// The spacing between the title and the content.
-  final double titleSpacing;
-
-  /// The paint used to draw the background of the modal.
-  final Paint dialogPaint;
-
-  /// The optional close button to be rendered in the top-right corner.
-  ///
-  /// The button will be automatically positioned based on [padding] and its own size.
-  /// Any [PositionComponent] can be used, including [SpriteButtonComponent].
-  final PositionComponent? closeButton;
-
-  /// The callback to invoke when the modal is closed.
-  ///
-  /// This is not wired to [closeButton] directly — you should attach it to the component manually.
-  final VoidCallback? onClose;
+  PositionComponent _scrollContent;
+  String? _title;
+  EdgeInsets _padding;
+  double? _contentHeight;
+  bool _autoContentHeight;
+  TextStyle? _titleStyle;
+  double _titleSpacing;
+  Paint _dialogPaint;
+  PositionComponent? _closeButton;
+  PositionComponent? _footer;
 
   /// The callback to invoke after the modal has finished loading.
-  final VoidCallback? onAfterLoad;
-
-  /// The optional footer component to display at the bottom of the modal.
-  final PositionComponent? footer;
+  VoidCallback? onAfterLoad;
 
   /// The default height of the footer if its size is not explicitly set.
-  final double defaultFooterHeight;
+  double defaultFooterHeight;
 
   /// The scrollable area component for the modal's content.
-  late final ScrollableAreaComponent scrollArea;
+  late ScrollableAreaComponent scrollArea;
 
   /// The background rectangle component for the modal.
-  late final RectangleComponent background;
+  late RectangleComponent background;
 
   /// The text component for the title, if a title is provided.
-  late final TextComponent? titleComponent;
+  late TextComponent? titleComponent;
 
   /// Creates a [ModalComponent] with the given parameters.
   ///
@@ -82,35 +55,122 @@ class ModalComponent extends PositionComponent with HasGameReference {
   /// [footer] optionally specifies a footer component to display at the bottom.
   /// [defaultFooterHeight] specifies the default height of the footer (default is 32).
   ModalComponent({
-    required this.scrollContent,
+    required PositionComponent scrollContent,
     required Vector2 size,
     required Vector2 position,
-    this.title,
-    this.padding = const EdgeInsets.all(8),
-    this.contentHeight,
-    this.autoContentHeight = true,
-    this.titleStyle,
-    this.titleSpacing = 2,
+    String? title,
+    EdgeInsets padding = const EdgeInsets.all(8),
+    double? contentHeight,
+    bool autoContentHeight = true,
+    TextStyle? titleStyle,
+    double titleSpacing = 2,
     Paint? paint,
-    this.closeButton,
-    this.onClose,
+    PositionComponent? closeButton,
     this.onAfterLoad,
-    this.footer,
+    PositionComponent? footer,
     this.defaultFooterHeight = 32,
-  }) : dialogPaint = paint ?? (Paint()..color = Colors.black87),
+  }) : _scrollContent = scrollContent,
+       _title = title,
+       _padding = padding,
+       _contentHeight = contentHeight,
+       _autoContentHeight = autoContentHeight,
+       _titleStyle = titleStyle,
+       _titleSpacing = titleSpacing,
+       _dialogPaint = paint ?? (Paint()..color = Colors.black87),
+       _closeButton = closeButton,
+       _footer = footer,
        super(size: size, position: position);
+
+  /// The content to be displayed inside the scrollable area of the modal.
+  PositionComponent get scrollContent => _scrollContent;
+  set scrollContent(PositionComponent value) {
+    _scrollContent = value;
+    rebuild();
+  }
+
+  /// The optional title of the modal.
+  String? get title => _title;
+  set title(String? value) {
+    _title = value;
+    rebuild();
+  }
+
+  /// The padding around the content of the modal.
+  EdgeInsets get padding => _padding;
+  set padding(EdgeInsets value) {
+    _padding = value;
+    rebuild();
+  }
+
+  /// The height of the content. If null, it will be resolved based on [autoContentHeight].
+  double? get contentHeight => _contentHeight;
+  set contentHeight(double? value) {
+    _contentHeight = value;
+    rebuild();
+  }
+
+  /// Whether to automatically determine the content height based on the size of the content.
+  bool get autoContentHeight => _autoContentHeight;
+  set autoContentHeight(bool value) {
+    _autoContentHeight = value;
+    rebuild();
+  }
+
+  /// The text style for the title.
+  TextStyle? get titleStyle => _titleStyle;
+  set titleStyle(TextStyle? value) {
+    _titleStyle = value;
+    rebuild();
+  }
+
+  /// The spacing between the title and the content.
+  double get titleSpacing => _titleSpacing;
+  set titleSpacing(double value) {
+    _titleSpacing = value;
+    rebuild();
+  }
+
+  /// The paint used to draw the background of the modal.
+  Paint get dialogPaint => _dialogPaint;
+  set dialogPaint(Paint value) {
+    _dialogPaint = value;
+    rebuild();
+  }
+
+  /// The optional close button to be rendered in the top-right corner.
+  ///
+  /// The button will be automatically positioned based on [padding] and its own size.
+  /// Any [PositionComponent] can be used, including [SpriteButtonComponent].
+  PositionComponent? get closeButton => _closeButton;
+  set closeButton(PositionComponent? value) {
+    _closeButton = value;
+    rebuild();
+  }
+
+  /// The optional footer component to display at the bottom of the modal.
+  PositionComponent? get footer => _footer;
+  set footer(PositionComponent? value) {
+    _footer = value;
+    rebuild();
+  }
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
+    await rebuild();
+  }
 
-    // Add the background rectangle.
+  /// Rebuilds the modal layout, useful when modifying properties like [scrollContent], [title], [footer], etc.
+  Future<void> rebuild() async {
+    removeAll(children);
+
     background = RectangleComponent(size: size, paint: dialogPaint);
     add(background);
 
     double scrollTop = padding.top;
+    double scrollBottom = padding.bottom;
 
-    // Add the title if it exists.
+    titleComponent = null;
     if (title != null) {
       titleComponent = TextComponent(
         text: title!,
@@ -127,9 +187,10 @@ class ModalComponent extends PositionComponent with HasGameReference {
         ),
       );
       add(titleComponent!);
+      await titleComponent!.onLoad();
+      scrollTop += titleComponent!.height + titleSpacing;
     }
 
-    // Add the close button if it exists, positioned top-right using padding.
     if (closeButton != null) {
       await closeButton!.onLoad();
       closeButton!
@@ -141,17 +202,8 @@ class ModalComponent extends PositionComponent with HasGameReference {
       add(closeButton!);
     }
 
-    // Adjust the scrollTop position below the title row.
-    if (titleComponent != null) {
-      await titleComponent!.onLoad();
-      scrollTop += titleComponent!.height + titleSpacing;
-    }
-
-    // Add the footer if it exists.
-    double scrollBottom = padding.bottom;
     if (footer != null) {
       await footer!.onLoad();
-      add(footer!);
       final footerHeight =
           footer!.size.y > 0 ? footer!.size.y : defaultFooterHeight;
       scrollBottom += footerHeight + titleSpacing;
@@ -159,9 +211,9 @@ class ModalComponent extends PositionComponent with HasGameReference {
         padding.left,
         size.y - scrollBottom + titleSpacing,
       );
+      add(footer!);
     }
 
-    // Create and add the scrollable area for the content.
     final scrollAreaSize = Vector2(
       size.x - padding.horizontal,
       size.y - scrollTop - scrollBottom,
@@ -176,17 +228,16 @@ class ModalComponent extends PositionComponent with HasGameReference {
     );
     add(scrollArea);
 
-    // Invoke the callback after the modal has loaded.
     onAfterLoad?.call();
   }
 
   /// Displays the modal by adding it to the game's viewport.
   Future<void> show(FlameGame game) async {
-    game.camera.viewport.add(this);
+    return game.camera.viewport.add(this);
   }
 
   /// Hides the modal by removing it from the game's viewport.
-  void hide(FlameGame game) {
-    game.camera.viewport.remove(this);
+  void hide() {
+    return game.camera.viewport.remove(this);
   }
 }
