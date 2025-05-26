@@ -9,26 +9,20 @@ typedef OnTextChanged = void Function(String);
 /// and interaction with a virtual keyboard.
 class TextFieldComponent extends PositionComponent
     with TapCallbacks, HasGameReference {
-  /// Background sprite for the text field.
-  Sprite? background;
+  /// Generic background component when not focused.
+  final PositionComponent? background;
 
-  /// Background using a nine-tile box for the text field.
-  NineTileBox? backgroundNineTile;
-
-  /// Background sprite when the text field is focused.
-  Sprite? focusedBackground;
-
-  /// Background using a nine-tile box when the text field is focused.
-  NineTileBox? focusedBackgroundNineTile;
+  /// Generic background component when focused.
+  final PositionComponent? backgroundFocused;
 
   /// Text style for the text content.
-  TextStyle textStyle;
+  final TextStyle textStyle;
 
   /// Callback triggered when the text changes.
   final OnTextChanged? onChanged;
 
   /// Hint text displayed when the text field is empty.
-  String? hintText;
+  final String? hintText;
 
   /// Indicates whether the text field is currently focused.
   bool isFocused = false;
@@ -54,16 +48,12 @@ class TextFieldComponent extends PositionComponent
   /// Creates a [TextFieldComponent].
   ///
   /// [position] and [size] define the position and size of the text field.
-  /// Optional parameters include [background], [backgroundNineTile],
-  /// [focusedBackground], [focusedBackgroundNineTile], [textStyle],
-  /// [onChanged], [hintText], [padding], and [controller].
+  /// Accepts generic background components for both states.
   TextFieldComponent({
     required Vector2 position,
     required Vector2 size,
     this.background,
-    this.backgroundNineTile,
-    this.focusedBackground,
-    this.focusedBackgroundNineTile,
+    this.backgroundFocused,
     this.textStyle = const TextStyle(color: Colors.white, fontSize: 12),
     this.onChanged,
     this.hintText,
@@ -83,22 +73,18 @@ class TextFieldComponent extends PositionComponent
   void render(Canvas canvas) {
     super.render(canvas);
 
-    final isNineTile =
-        backgroundNineTile != null || focusedBackgroundNineTile != null;
-    final box =
-        isFocused
-            ? isNineTile
-                ? focusedBackgroundNineTile ?? backgroundNineTile
-                : focusedBackground ?? background
-            : isNineTile
-            ? backgroundNineTile
-            : background;
+    final bg = isFocused ? backgroundFocused ?? background : background;
 
-    if (box is NineTileBox) {
-      box.draw(canvas, Vector2.zero(), size);
-    } else if (box is Sprite) {
-      box.render(canvas, size: size);
+    if (bg is SpriteComponent && bg.sprite != null) {
+      bg.sprite!.render(canvas, size: size);
+    } else if (bg is NineTileBoxComponent && bg.nineTileBox != null) {
+      bg.nineTileBox!.draw(canvas, Vector2.zero(), size);
+    } else if (bg != null) {
+      bg.position = Vector2.zero();
+      bg.size = size;
+      bg.render(canvas);
     }
+
     final textOffset = Vector2(
       padding.left,
       (size.y - textStyle.fontSize!) / 2,
@@ -115,14 +101,12 @@ class TextFieldComponent extends PositionComponent
     _focus();
   }
 
-  /// Focuses the text field and displays the virtual keyboard.
   void _focus() {
     if (isFocused) return;
     isFocused = true;
     _showKeyboardOverlay();
   }
 
-  /// Unfocuses the text field and hides the virtual keyboard.
   void _unfocus() {
     if (!isFocused) return;
     isFocused = false;
@@ -131,13 +115,11 @@ class TextFieldComponent extends PositionComponent
     _focusNode.unfocus();
   }
 
-  /// Displays the virtual keyboard overlay for text input.
   void _showKeyboardOverlay() {
     final context = game.buildContext;
     if (context == null) return;
 
     final overlay = Overlay.of(context);
-
     final renderBox = context.findRenderObject() as RenderBox?;
     final gameOffset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
     final componentOffset = Offset(position.x, position.y);
