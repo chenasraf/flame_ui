@@ -1,10 +1,13 @@
+import 'dart:math';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 
 /// A component that provides a scrollable area for its content.
 ///
 /// This component allows for vertical scrolling of its child content
-/// within a defined viewport size.
+/// within a defined viewport size, and supports fling scrolling with
+/// velocity and damping behavior.
 class ScrollableAreaComponent extends PositionComponent
     with HasGameReference, DragCallbacks {
   /// The content to be displayed inside the scrollable area.
@@ -25,59 +28,107 @@ class ScrollableAreaComponent extends PositionComponent
   /// The current vertical scroll offset.
   double scrollOffset = 0.0;
 
-  /// Creates a [ScrollableAreaComponent].
-  ///
-  /// [content] is the child component to be displayed inside the scrollable area.
-  /// [size] specifies the size of the viewport.
-  /// [position] specifies the position of the scrollable area.
-  /// [contentHeight] optionally specifies the height of the content.
-  /// [autoContentHeight] determines if the content height should be
-  /// automatically calculated (default is true).
+  /// The current vertical velocity from a fling.
+  double _scrollVelocity = 0.0;
+
+  /// The amount of velocity reduction per second.
+  final double damping;
+
+  /// A short buffer of recent drag deltas to calculate fling speed.
+  final List<_DragSample> _dragSamples = [];
+
+  /// Max time range (ms) for calculating fling speed.
+  final Duration _sampleWindow = const Duration(milliseconds: 100);
+
   ScrollableAreaComponent({
     required this.content,
     required Vector2 size,
     required Vector2 position,
     this.contentHeight,
     this.autoContentHeight = true,
+    this.damping = 500.0,
   }) : super(size: size, position: position);
 
-  /// Resolves the height of the content based on [contentHeight] or
-  /// [autoContentHeight].
   double get resolvedContentHeight =>
       contentHeight ?? (autoContentHeight ? content.size.y : size.y);
 
-  /// The height of the viewport.
   double get viewportHeight => size.y;
 
   @override
   Future<void> onLoad() async {
     await super.onLoad();
 
-    // Create a clipping component to restrict content visibility to the viewport.
     clip = ClipComponent.rectangle(size: size);
     add(clip);
 
-    // Position the content at the top-left corner and add it to the clip.
     content.position = Vector2.zero();
     clip.add(content);
   }
 
   @override
   bool onDragUpdate(DragUpdateEvent event) {
-    // Update the scroll offset based on the drag event's vertical delta.
-    scrollOffset -= event.canvasDelta.y;
+    final now = DateTime.now();
+    _dragSamples.add(_DragSample(now, -event.canvasDelta.y));
 
-    // Calculate the maximum scroll offset to prevent scrolling beyond content.
-    final maxOffset = (resolvedContentHeight - viewportHeight).clamp(
-      0.0,
-      double.infinity,
+    // Remove old samples
+    _dragSamples.removeWhere(
+      (sample) => now.difference(sample.time) > _sampleWindow,
     );
 
-    // Clamp the scroll offset within the valid range.
-    scrollOffset = scrollOffset.clamp(0.0, maxOffset);
-
-    // Update the content's position based on the scroll offset.
-    content.position = Vector2(0, -scrollOffset);
+    _applyScroll(-event.canvasDelta.y);
     return true;
   }
+
+  @override
+  bool onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
+
+    final now = DateTime.now();
+    _dragSamples.removeWhere(
+      (sample) => now.difference(sample.time) > _sampleWindow,
+    );
+
+    if (_dragSamples.length >= 2) {
+      final oldest = _dragSamples.first;
+      final newest = _dragSamples.last;
+      final dy = newest.offset - oldest.offset;
+      final dt = newest.time.difference(oldest.time).inMilliseconds / 1000;
+      if (dt > 0) {
+        _scrollVelocity = dy / dt;
+      }
+    }
+
+    _dragSamples.clear();
+    return true;
+  }
+
+  void _applyScroll(double delta) {
+    scrollOffset += delta;
+    final maxOffset = max(resolvedContentHeight - viewportHeight, 0.0);
+    scrollOffset = scrollOffset.clamp(0.0, maxOffset);
+    content.position = Vector2(0, -scrollOffset);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    if (_scrollVelocity.abs() > 1.0) {
+      _applyScroll(-_scrollVelocity * dt);
+
+      final sign = _scrollVelocity.sign;
+      _scrollVelocity -= sign * damping * dt;
+
+      if (_scrollVelocity.sign != sign) {
+        _scrollVelocity = 0.0;
+      }
+    }
+  }
+}
+
+class _DragSample {
+  final DateTime time;
+  final double offset;
+
+  _DragSample(this.time, this.offset);
 }
