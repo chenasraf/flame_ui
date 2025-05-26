@@ -3,6 +3,7 @@
 - `ModalComponent`: All configurable properties are now mutable via getters and setters.
 - `ModalComponent`: Automatically calls `rebuild()` when a property is changed at runtime, enabling
   dynamic UI updates.
+- `ModalComponent`: Add customizable background component property
 - `ScrollableAreaComponent`: Added support for fling scrolling
 
 ## 0.0.2

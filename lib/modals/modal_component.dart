@@ -18,9 +18,9 @@ class ModalComponent extends PositionComponent with HasGameReference {
   bool _autoContentHeight;
   TextStyle? _titleStyle;
   double _titleSpacing;
-  Paint _dialogPaint;
   PositionComponent? _closeButton;
   PositionComponent? _footer;
+  PositionComponent? _background;
 
   /// The callback to invoke after the modal has finished loading.
   VoidCallback? onAfterLoad;
@@ -32,7 +32,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
   late ScrollableAreaComponent scrollArea;
 
   /// The background rectangle component for the modal.
-  late RectangleComponent background;
+  late PositionComponent _backgroundComponent;
 
   /// The text component for the title, if a title is provided.
   late TextComponent? titleComponent;
@@ -49,8 +49,8 @@ class ModalComponent extends PositionComponent with HasGameReference {
   /// [titleStyle] specifies the text style for the title.
   /// [titleSpacing] specifies the spacing between the title and the content (default is 2).
   /// [paint] optionally specifies the paint for the background.
+  /// [background] allows passing a custom component to use as the modal background instead of a default rectangle.
   /// [closeButton] optionally provides a component to render in the top-right corner.
-  /// [onClose] optionally specifies a callback to call when the modal is closed.
   /// [onAfterLoad] optionally specifies a callback after the modal has loaded.
   /// [footer] optionally specifies a footer component to display at the bottom.
   /// [defaultFooterHeight] specifies the default height of the footer (default is 32).
@@ -68,6 +68,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
     PositionComponent? closeButton,
     this.onAfterLoad,
     PositionComponent? footer,
+    PositionComponent? background,
     this.defaultFooterHeight = 32,
   }) : _scrollContent = scrollContent,
        _title = title,
@@ -76,9 +77,9 @@ class ModalComponent extends PositionComponent with HasGameReference {
        _autoContentHeight = autoContentHeight,
        _titleStyle = titleStyle,
        _titleSpacing = titleSpacing,
-       _dialogPaint = paint ?? (Paint()..color = Colors.black87),
        _closeButton = closeButton,
        _footer = footer,
+       _background = background,
        super(size: size, position: position);
 
   /// The content to be displayed inside the scrollable area of the modal.
@@ -130,10 +131,10 @@ class ModalComponent extends PositionComponent with HasGameReference {
     rebuild();
   }
 
-  /// The paint used to draw the background of the modal.
-  Paint get dialogPaint => _dialogPaint;
-  set dialogPaint(Paint value) {
-    _dialogPaint = value;
+  /// The custom background of the modal.
+  PositionComponent get background => _background ?? _backgroundComponent;
+  set background(PositionComponent value) {
+    _background = value;
     rebuild();
   }
 
@@ -164,8 +165,12 @@ class ModalComponent extends PositionComponent with HasGameReference {
   Future<void> rebuild() async {
     removeAll(children);
 
-    background = RectangleComponent(size: size, paint: dialogPaint);
-    add(background);
+    _backgroundComponent =
+        _background ??
+        RectangleComponent(size: size, paint: Paint()..color = Colors.black87);
+    _backgroundComponent.size = size;
+    _backgroundComponent.position = Vector2.zero();
+    add(_backgroundComponent);
 
     double scrollTop = padding.top;
     double scrollBottom = padding.bottom;
