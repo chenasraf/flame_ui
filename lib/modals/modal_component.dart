@@ -21,6 +21,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
   PositionComponent? _closeButton;
   PositionComponent? _footer;
   PositionComponent? _background;
+  double? _scrollDamping;
 
   /// The callback to invoke after the modal has finished loading.
   VoidCallback? onAfterLoad;
@@ -36,6 +37,12 @@ class ModalComponent extends PositionComponent with HasGameReference {
 
   /// The text component for the title, if a title is provided.
   late TextComponent? titleComponent;
+
+  /// Static callback for after load event, useful for initialization or registering the modal in a stack.
+  static void Function(ModalComponent modal)? onAfterLoadStatic;
+
+  /// Static callback for before unload event, useful for cleanup.
+  static void Function(ModalComponent modal)? onBeforeUnloadStatic;
 
   /// Creates a [ModalComponent] with the given parameters.
   ///
@@ -54,6 +61,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
   /// [onAfterLoad] optionally specifies a callback after the modal has loaded.
   /// [footer] optionally specifies a footer component to display at the bottom.
   /// [defaultFooterHeight] specifies the default height of the footer (default is 32).
+  /// [scrollDamping] specifies the damping factor for scroll velocity (default is 500.0).
   ModalComponent({
     required PositionComponent scrollContent,
     required Vector2 size,
@@ -70,6 +78,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
     PositionComponent? footer,
     PositionComponent? background,
     this.defaultFooterHeight = 32,
+    double scrollDamping = 500.0,
   }) : _scrollContent = scrollContent,
        _title = title,
        _padding = padding,
@@ -80,6 +89,7 @@ class ModalComponent extends PositionComponent with HasGameReference {
        _closeButton = closeButton,
        _footer = footer,
        _background = background,
+       _scrollDamping = scrollDamping,
        super(size: size, position: position);
 
   /// The content to be displayed inside the scrollable area of the modal.
@@ -153,6 +163,13 @@ class ModalComponent extends PositionComponent with HasGameReference {
   set footer(PositionComponent? value) {
     _footer = value;
     rebuild();
+  }
+
+  /// The damping factor for scroll velocity, used in the scrollable area.
+  double get scrollDamping => _scrollDamping ?? 500.0;
+  set scrollDamping(double value) {
+    _scrollDamping = value;
+    scrollArea.damping = value;
   }
 
   @override
@@ -237,12 +254,16 @@ class ModalComponent extends PositionComponent with HasGameReference {
   }
 
   /// Displays the modal by adding it to the game's viewport.
+  /// Calls [onAfterLoadStatic] after loading.
   Future<void> show(FlameGame game) async {
-    return game.camera.viewport.add(this);
+    await game.camera.viewport.add(this);
+    onAfterLoadStatic?.call(this);
   }
 
   /// Hides the modal by removing it from the game's viewport.
+  /// Calls [onBeforeUnloadStatic] before unloading.
   void hide() {
+    onBeforeUnloadStatic?.call(this);
     return game.camera.viewport.remove(this);
   }
 }

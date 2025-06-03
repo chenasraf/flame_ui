@@ -1,3 +1,10 @@
+## 0.0.4
+
+- `TextFieldComponent`: Support generic components for background/backgroundFocused
+- `ModalComponent`: Support for `scrollDamping`
+- `ModalComponent`: Add `onAfterLoadStatic` and `onBeforeUnloadStatic` as lifecycle callbacks across
+  all ModalComponent usages
+
 ## 0.0.3
 
 - `ModalComponent`: All configurable properties are now mutable via getters and setters.

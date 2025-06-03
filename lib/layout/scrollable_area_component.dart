@@ -32,7 +32,7 @@ class ScrollableAreaComponent extends PositionComponent
   double _scrollVelocity = 0.0;
 
   /// The amount of velocity reduction per second.
-  final double damping;
+  double damping;
 
   /// A short buffer of recent drag deltas to calculate fling speed.
   final List<_DragSample> _dragSamples = [];
