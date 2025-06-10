@@ -20,9 +20,10 @@ class FlameUIExample extends FlameGame
   Future<void> onLoad() async {
     final screenSize = size;
 
-    final rootContainer = PositionComponent(
+    final rootContainer = RectangleComponent(
       position: Vector2.zero(),
       size: Vector2(screenSize.x, 400), // Tall enough to scroll
+      paint: Paint()..color = Colors.blue[900]!,
     );
 
     // TextField
@@ -30,10 +31,12 @@ class FlameUIExample extends FlameGame
       position: Vector2(20, 20),
       size: Vector2(180, 32),
       hintText: 'Enter name',
-      backgroundNineTile: NineTileBox(
-        Sprite(await images.load('textbox.png')),
-        tileSize: 16,
-        destTileSize: 16,
+      background: NineTileBoxComponent(
+        nineTileBox: NineTileBox(
+          Sprite(await images.load('textbox.png')),
+          tileSize: 16,
+          destTileSize: 16,
+        ),
       ),
       textStyle: const TextStyle(color: Colors.white, fontSize: 12),
       onChanged: (value) => print('Text changed: $value'),
@@ -42,7 +45,7 @@ class FlameUIExample extends FlameGame
     rootContainer.add(nameField);
 
     // RectButton that shows modal
-    final showModalButton = RectButtonComponent(
+    final showModalButton = RectangleButtonComponent(
       label: 'Show Modal',
       position: Vector2(20, 60),
       size: Vector2(100, 28),
@@ -71,7 +74,7 @@ class FlameUIExample extends FlameGame
     // GridComponent
     final grid = GridComponent(
       children: List.generate(4, (i) {
-        return RectButtonComponent(
+        return RectangleButtonComponent(
           label: 'G$i',
           size: Vector2.all(36),
           position: Vector2.zero(),
@@ -90,7 +93,7 @@ class FlameUIExample extends FlameGame
     final scrollable = ScrollableAreaComponent(
       content: rootContainer,
       size: screenSize,
-      position: Vector2.zero(),
+      position: Vector2(0, 60),
       autoContentHeight: true,
     );
 
@@ -113,16 +116,16 @@ class FlameUIExample extends FlameGame
 
     final sprite = Sprite(await images.load('cross.png'));
     modal = ModalComponent(
-      closeButton: SpriteButtonComponent(
+      trailing: SpriteButtonComponent(
         button: sprite,
         buttonDown: sprite,
         size: Vector2.all(16),
+        onPressed: () => remove(modal),
       ),
       scrollContent: modalContent,
       size: Vector2(200, 200),
       position: size / 2 - Vector2(100, 100),
       title: 'Modal Title',
-      onClose: () => remove(modal),
     );
 
     add(modal);

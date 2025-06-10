@@ -115,15 +115,28 @@ class TextFieldComponent extends PositionComponent
     _focusNode.unfocus();
   }
 
+  Offset get globalPosition {
+    final renderBox = game.buildContext?.findRenderObject() as RenderBox?;
+    if (renderBox == null) return Offset.zero;
+    Offset offset = renderBox.localToGlobal(Offset.zero);
+    PositionComponent? component = this;
+    while (component != null) {
+      offset += Offset(component.position.x, component.position.y);
+      if (component.parent is PositionComponent) {
+        component = component.parent as PositionComponent?;
+      } else {
+        break;
+      }
+    }
+    return offset;
+  }
+
   void _showKeyboardOverlay() {
     final context = game.buildContext;
     if (context == null) return;
 
     final overlay = Overlay.of(context);
-    final renderBox = context.findRenderObject() as RenderBox?;
-    final gameOffset = renderBox?.localToGlobal(Offset.zero) ?? Offset.zero;
-    final componentOffset = Offset(position.x, position.y);
-    final screenPosition = gameOffset + componentOffset;
+    final screenPosition = globalPosition;
 
     _overlayEntry = OverlayEntry(
       builder:

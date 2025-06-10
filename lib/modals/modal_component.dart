@@ -1,6 +1,5 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
-import 'package:flame/input.dart';
 import 'package:flutter/material.dart' show Colors, TextStyle, EdgeInsets;
 import 'package:flutter/painting.dart';
 
@@ -18,7 +17,8 @@ class ModalComponent extends PositionComponent with HasGameReference {
   bool _autoContentHeight;
   TextStyle? _titleStyle;
   double _titleSpacing;
-  PositionComponent? _closeButton;
+  PositionComponent? _leading;
+  PositionComponent? _trailing;
   PositionComponent? _footer;
   PositionComponent? _background;
   double? _scrollDamping;
@@ -57,7 +57,8 @@ class ModalComponent extends PositionComponent with HasGameReference {
   /// [titleSpacing] specifies the spacing between the title and the content (default is 2).
   /// [paint] optionally specifies the paint for the background.
   /// [background] allows passing a custom component to use as the modal background instead of a default rectangle.
-  /// [closeButton] optionally provides a component to render in the top-right corner.
+  /// [leading] optionally provides a component to render in the top-left corner.
+  /// [trailing] optionally provides a component to render in the top-right corner.
   /// [onAfterLoad] optionally specifies a callback after the modal has loaded.
   /// [footer] optionally specifies a footer component to display at the bottom.
   /// [defaultFooterHeight] specifies the default height of the footer (default is 32).
@@ -73,7 +74,8 @@ class ModalComponent extends PositionComponent with HasGameReference {
     TextStyle? titleStyle,
     double titleSpacing = 2,
     Paint? paint,
-    PositionComponent? closeButton,
+    PositionComponent? leading,
+    PositionComponent? trailing,
     this.onAfterLoad,
     PositionComponent? footer,
     PositionComponent? background,
@@ -86,7 +88,8 @@ class ModalComponent extends PositionComponent with HasGameReference {
        _autoContentHeight = autoContentHeight,
        _titleStyle = titleStyle,
        _titleSpacing = titleSpacing,
-       _closeButton = closeButton,
+       _leading = leading,
+       _trailing = trailing,
        _footer = footer,
        _background = background,
        _scrollDamping = scrollDamping,
@@ -148,13 +151,21 @@ class ModalComponent extends PositionComponent with HasGameReference {
     rebuild();
   }
 
-  /// The optional close button to be rendered in the top-right corner.
+  /// An optional component to render in the top-left corner of the modal.
   ///
-  /// The button will be automatically positioned based on [padding] and its own size.
-  /// Any [PositionComponent] can be used, including [SpriteButtonComponent].
-  PositionComponent? get closeButton => _closeButton;
-  set closeButton(PositionComponent? value) {
-    _closeButton = value;
+  /// The component will be automatically positioned based on [padding] and its own size.
+  PositionComponent? get leading => _leading;
+  set leading(PositionComponent? value) {
+    _leading = value;
+    rebuild();
+  }
+
+  /// An optional component to render in the top-right corner of the modal.
+  ///
+  /// The component will be automatically positioned based on [padding] and its own size.
+  PositionComponent? get trailing => _trailing;
+  set trailing(PositionComponent? value) {
+    _trailing = value;
     rebuild();
   }
 
@@ -213,15 +224,15 @@ class ModalComponent extends PositionComponent with HasGameReference {
       scrollTop += titleComponent!.height + titleSpacing;
     }
 
-    if (closeButton != null) {
-      await closeButton!.onLoad();
-      closeButton!
+    if (trailing != null) {
+      await trailing!.onLoad();
+      trailing!
         ..position = Vector2(
-          size.x - padding.right - closeButton!.size.x,
+          size.x - padding.right - trailing!.size.x,
           padding.top,
         )
         ..anchor = Anchor.topLeft;
-      add(closeButton!);
+      add(trailing!);
     }
 
     if (footer != null) {

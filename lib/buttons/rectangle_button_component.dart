@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 ///
 /// This component displays a button with a label and handles tap events.
 /// It changes its background color when pressed and triggers the `onPressed` callback.
-class RectButtonComponent extends PositionComponent
+class RectangleButtonComponent extends PositionComponent
     with TapCallbacks, HasVisibility {
   /// Callback function to be executed when the button is pressed.
   void Function() onPressed;
@@ -32,7 +32,7 @@ class RectButtonComponent extends PositionComponent
   /// The text component displaying the label.
   late TextComponent text;
 
-  /// Creates a [RectButtonComponent].
+  /// Creates a [RectangleButtonComponent].
   ///
   /// [onPressed] is the callback triggered when the button is pressed.
   /// [label] is the text displayed on the button.
@@ -40,7 +40,7 @@ class RectButtonComponent extends PositionComponent
   /// [color] is the default background color.
   /// [pressedColor] is the background color when pressed. Defaults to [color].
   /// [textColor] is the color of the label text.
-  RectButtonComponent({
+  RectangleButtonComponent({
     required this.onPressed,
     required this.label,
     required super.size,

@@ -1,3 +1,11 @@
+## 0.0.5
+
+- `ModalComponent`: Rename `closeButton` to `trailing`
+- `ModalComponent`: Add `leading` property
+- Add `CircleButtonComponent`
+- Rename `RectButtonComponent` to `RectangleButtonComponent`
+- Fix `TextFieldComponent` position and offset
+
 ## 0.0.4
 
 - `TextFieldComponent`: Support generic components for background/backgroundFocused
