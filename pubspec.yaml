@@ -1,6 +1,6 @@
 name: flame_ui
 description: A reusable UI component library for Flame games, including buttons, text fields, modals, lists, and layout helpers.
-version: 0.0.4
+version: 0.1.0
 homepage: https://github.com/chenasraf/flame_ui
 repository: https://github.com/chenasraf/flame_ui
 

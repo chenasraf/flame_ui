@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
+
+import '../helpers/tap_outside_handler.dart';
 
 /// A callback type for handling text changes.
 typedef OnTextChanged = void Function(String);
@@ -8,7 +12,7 @@ typedef OnTextChanged = void Function(String);
 /// A custom text field component for Flame games, supporting focus, rendering,
 /// and interaction with a virtual keyboard.
 class TextFieldComponent extends PositionComponent
-    with TapCallbacks, HasGameReference {
+    with TapCallbacks, HasGameReference, TapOutsideCallbacks {
   /// Generic background component when not focused.
   final PositionComponent? background;
 
@@ -70,6 +74,12 @@ class TextFieldComponent extends PositionComponent
   }
 
   @override
+  Future<void> onLoad() async {
+    super.onLoad();
+    game.ensureGlobalTapCatcher().then((catcher) => catcher.register(this));
+  }
+
+  @override
   void render(Canvas canvas) {
     super.render(canvas);
 
@@ -98,16 +108,21 @@ class TextFieldComponent extends PositionComponent
 
   @override
   void onTapDown(TapDownEvent event) {
-    _focus();
+    focus();
   }
 
-  void _focus() {
+  @override
+  void onTapDownOutside(TapDownEvent event) {
+    unfocus();
+  }
+
+  void focus() {
     if (isFocused) return;
     isFocused = true;
     _showKeyboardOverlay();
   }
 
-  void _unfocus() {
+  void unfocus() {
     if (!isFocused) return;
     isFocused = false;
     _overlayEntry?.remove();
@@ -166,7 +181,8 @@ class TextFieldComponent extends PositionComponent
 
   @override
   void onRemove() {
-    _unfocus();
+    unfocus();
+    game.children.query<TapOutsideHandler>().firstOrNull?.unregister(this);
     super.onRemove();
   }
 }

@@ -8,32 +8,37 @@ import 'package:flutter/widgets.dart';
 /// and toggles between them when tapped. It supports custom animations during the toggle,
 /// provides a callback for value changes, and can be marked non-interactive via [disabled].
 ///
-/// ### Example: Animate a child icon when toggled
+/// ### Example: Animate a child indicator when toggled
 ///
 /// ```dart
-/// final icon = SpriteComponent(sprite: yourIcon, size: Vector2.all(12))
-///   ..position = Vector2(10, 10);
-///
-/// final onVisual = RectangleComponent(size: Vector2.all(32), children: [icon]);
-/// final offVisual = RectangleComponent(size: Vector2.all(32));
-///
-/// final toggle = ToggleComponent(
-///   value: false,
-///   onChanged: (val) => print('Toggled to $val'),
-///   valueOn: onVisual,
-///   valueOff: offVisual,
-///   onAnimate: (visual, newValue) {
-///     // Move the icon upward briefly when toggled
-///     final icon = visual.children.query<SpriteComponent>().first;
-///     icon.add(
-///       MoveEffect.by(
-///         Vector2(0, -4),
-///         EffectController(duration: 0.1, reverseDuration: 0.1, alternate: true),
-///       ),
-///     );
-///   },
-/// );
-/// ```
+// final visual = RectangleComponent(
+//   size: Vector2(80, 32),
+//   paint: Paint()..color = Colors.green,
+//   children: [_ToggleIndicator(radius: 16, position: Vector2(40, 16))],
+// );
+//
+// late ToggleComponent toggle;
+// toggle = ToggleComponent(
+//   position: Vector2(20, 340),
+//   value: false,
+//   onChanged: (val) {
+//     print('Toggled to $val');
+//     toggle.value = val;
+//   },
+//   valueOn: visual,
+//   valueOff: visual,
+//   onAnimate: (visual, newValue) {
+//     // Move the icon upward briefly when toggled
+//     final indicator = visual.children.query<_ToggleIndicator>().first;
+//     final amount = 24.0;
+//     indicator.add(
+//       MoveEffect.by(
+//         Vector2(newValue ? amount : -amount, 0),
+//         EffectController(duration: 0.3, curve: Curves.easeInOut),
+//       ),
+//     );
+//   },
+// );
 class ToggleComponent extends PositionComponent with TapCallbacks {
   /// The current value of the toggle. `true` for enabled, `false` for disabled.
   bool _value;

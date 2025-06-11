@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_print
 
 import 'package:flame/components.dart';
+import 'package:flame/effects.dart';
 import 'package:flame/events.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
@@ -74,20 +75,51 @@ class FlameUIExample extends FlameGame
     // GridComponent
     final grid = GridComponent(
       children: List.generate(4, (i) {
-        return RectangleButtonComponent(
+        return CircleButtonComponent(
           label: 'G$i',
-          size: Vector2.all(36),
+          radius: 18,
           position: Vector2.zero(),
-          color: Colors.red,
+          color: Colors.blue,
           onPressed: () => print('Grid $i'),
         );
       }),
       childSize: Vector2.all(36),
       spacing: Vector2.all(4),
       size: Vector2(100, 100),
-      position: Vector2(20, 260),
+      position: Vector2(40, 260),
     );
     rootContainer.add(grid);
+
+    final visual = RectangleComponent(
+      size: Vector2(80, 32),
+      paint: Paint()..color = Colors.green,
+      children: [_ToggleIndicator(radius: 16, position: Vector2(40, 16))],
+    );
+
+    late ToggleComponent toggle;
+    toggle = ToggleComponent(
+      position: Vector2(20, 340),
+      value: false,
+      onChanged: (val) {
+        print('Toggled to $val');
+        toggle.value = val;
+      },
+      valueOn: visual,
+      valueOff: visual,
+      onAnimate: (visual, newValue) {
+        // Move the icon upward briefly when toggled
+        final indicator = visual.children.query<_ToggleIndicator>().first;
+        final amount = 24.0;
+        indicator.add(
+          MoveEffect.by(
+            Vector2(newValue ? amount : -amount, 0),
+            EffectController(duration: 0.3, curve: Curves.easeInOut),
+          ),
+        );
+      },
+    );
+
+    rootContainer.add(toggle);
 
     // Wrap everything in scrollable area
     final scrollable = ScrollableAreaComponent(
@@ -129,5 +161,20 @@ class FlameUIExample extends FlameGame
     );
 
     add(modal);
+  }
+}
+
+class _ToggleIndicator extends PositionComponent {
+  double radius;
+  _ToggleIndicator({super.position, required this.radius});
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    canvas.drawCircle(
+      Offset(position.x - radius, position.y - radius),
+      radius,
+      Paint()..color = Colors.red,
+    );
   }
 }

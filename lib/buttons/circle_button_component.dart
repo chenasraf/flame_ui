@@ -70,9 +70,6 @@ class CircleButtonComponent extends PositionComponent
   /// The color of the label text.
   Color textColor;
 
-  /// The current background color of the button.
-  late Color currentColor;
-
   TextComponent? _text;
 
   /// The paint used for the button's background.
@@ -88,7 +85,8 @@ class CircleButtonComponent extends PositionComponent
   ///
   /// [onPressed] is the callback triggered when the button is pressed.
   /// [label] is the text displayed on the button.
-  /// [size] and [position] define the size and position of the button.
+  /// [sprite] is the sprite displayed on the button.
+  /// [radius] and [position] define the size and position of the button.
   /// [color] is the default background color.
   /// [pressedColor] is the background color when pressed. Defaults to [color].
   /// [textColor] is the color of the label text.
@@ -110,7 +108,6 @@ class CircleButtonComponent extends PositionComponent
        _label = label,
        _sprite = sprite,
        pressedColor = pressedColor ?? color,
-       currentColor = color,
        paint =
            Paint()
              ..color = color
@@ -158,4 +155,8 @@ class CircleButtonComponent extends PositionComponent
     super.render(canvas);
     canvas.drawCircle(Offset.zero, radius, paint);
   }
+
+  @override
+  bool containsLocalPoint(Vector2 point) =>
+      point.distanceTo(Vector2.zero()) <= radius;
 }

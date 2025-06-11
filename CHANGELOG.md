@@ -1,8 +1,10 @@
-## 0.0.5
+## 0.1.0
 
+- Add `CircleButtonComponent`
+- Add `ToggleComponent`
+- Add `TapOutsideCallbacks` & `TapOutsideHandler`
 - `ModalComponent`: Rename `closeButton` to `trailing`
 - `ModalComponent`: Add `leading` property
-- Add `CircleButtonComponent`
 - Rename `RectButtonComponent` to `RectangleButtonComponent`
 - Fix `TextFieldComponent` position and offset
 

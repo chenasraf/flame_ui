@@ -23,9 +23,6 @@ class RectangleButtonComponent extends PositionComponent
   /// The color of the label text.
   Color textColor;
 
-  /// The current background color of the button.
-  late Color currentColor;
-
   /// The background rectangle of the button.
   late RectangleComponent background;
 
@@ -48,16 +45,12 @@ class RectangleButtonComponent extends PositionComponent
     required this.color,
     Color? pressedColor,
     this.textColor = Colors.white,
-  }) : pressedColor = pressedColor ?? color,
-       currentColor = color;
+  }) : pressedColor = pressedColor ?? color;
 
   /// Loads the button's components (background and text).
   @override
   Future<void> onLoad() async {
-    background = RectangleComponent(
-      size: size,
-      paint: Paint()..color = currentColor,
-    );
+    background = RectangleComponent(size: size, paint: Paint()..color = color);
 
     text = TextComponent(
       text: label,
